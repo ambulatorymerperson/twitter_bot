@@ -1,9 +1,10 @@
 """A Markov chain generator that can tweet random messages."""
 
 import os
+import twitter
 import sys
 from random import choice
-import twitter
+MAX_LENGTH = 139
 
 
 def open_and_read_file(filenames):
@@ -62,13 +63,17 @@ def make_text(chains):
 
 def tweet(chains):
     """Create a tweet and send it to the Internet."""
+    api = twitter.Api(
+        consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+        consumer_secret=os.environ['TWITTER_CONSUMER_SECRET'],
+        access_token_key=os.environ['TWITTER_ACCESS_TOKEN_KEY'],
+        access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
 
-    # Use Python os.environ to get at environmental variables
-    # Note: you must run `source secrets.sh` before running this file
-    # to make sure these environmental variables are set.
-
-    pass
-
+    print api.VerifyCredentials()
+    tweet = make_text(chains)
+    tweet = tweet[:140]
+    status = api.PostUpdate(tweet)
+    print status.text
 
 # Get the filenames from the user through a command line prompt, ex:
 # python markov.py green-eggs.txt shakespeare.txt
@@ -80,5 +85,6 @@ text = open_and_read_file(filenames)
 # Get a Markov chain
 chains = make_chains(text)
 
+tweet(chains)
 # Your task is to write a new function tweet, that will take chains as input
 # tweet(chains)
